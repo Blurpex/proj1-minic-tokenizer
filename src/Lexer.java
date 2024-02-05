@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Lexer {
 
     private static final char EOF = 0;
@@ -86,8 +90,8 @@ public class Lexer {
     public int yylex() throws Exception {
 
         int state = 0;
-        String lexeme = "";
         char c, nextChar;
+        List<Character> symbols = Arrays.asList( '(', ')', ':', '=', '+', '-', '*', '/', ';', ',', '<', '>' );
 
         while(true) {
             switch(state) {
@@ -95,116 +99,121 @@ public class Lexer {
                     c = getNextChar();
                     // ignore newlines and whitespace
                     if(Character.isWhitespace(c)) continue;
-
-                    if(c == ';') {
-                        state = 1;
-                        continue;
-                    } else if(c == '+' || c == '-' || c == '*' || c == '/') {
-                        lexeme = String.valueOf(c);
-                        state = 2;
-                        continue;
-                    } else if(c == '(') {
-                        state = 3;
-                        continue;
-                    } else if(c == ')') {
-                        state = 4;
-                        continue;
-                    } else if(c == ',') {
-                        state = 5;
-                        continue;
-                    } else if(c == '<') {
-                        state = 6;
-                        continue;
-                    } else if(c == '>') {
-                        state = 7;
-                        continue;
-                    } else if(c == ':') {
-                        state = 8;
-                        continue;
-                    } else if(c == '=') {
-                        yyparser.yylval = new ParserVal((Object) "=");
-                        return Parser.RELOP;
-                    } else if(Character.isLetter(c)) {
+//                    if(c == ';') {
+//                        yyparser.yylval = new ParserVal((Object) c);
+//                        return Parser.SEMI;
+//                    }
+//                    else if(c == '+' || c == '-' || c == '*' || c == '/') {
+//                        yyparser.yylval = new ParserVal((Object) c);
+//                        return Parser.OP;
+//                    }
+//                    else if(c == '(') {
+//                        yyparser.yylval = new ParserVal((Object) "(");
+//                        return Parser.LPAREN;
+//                    }
+//                    else if(c == ')') {
+//                        yyparser.yylval = new ParserVal((Object) ")");
+//                        return Parser.RPAREN;
+//                    }
+//                    else if(c == ',') {
+//                        yyparser.yylval = new ParserVal((Object) ",");
+//                        return Parser.COMMA;
+//                    }
+//                    else if(c == '<') {
+//                        nextChar = getNextChar();
+//                        if(nextChar == '=') {
+//                            yyparser.yylval = new ParserVal((Object) "<=");
+//                            return Parser.RELOP;
+//                        }
+//                        else if(nextChar == '>') {
+//                            yyparser.yylval = new ParserVal((Object) "<>");
+//                            return Parser.RELOP;
+//                        }
+//                        else {
+//                            this.bufferPosition--;      // retract
+//                            yyparser.yylval = new ParserVal((Object) "<");
+//                            return Parser.RELOP;
+//                        }
+//                    }
+//                    else if(c == '>') {
+//                        nextChar = getNextChar();
+//                        if(nextChar == '=') {
+//                            yyparser.yylval = new ParserVal((Object) ">=");
+//                            return Parser.RELOP;
+//                        }
+//                        else {
+//                            this.bufferPosition--;      // retract
+//                            yyparser.yylval = new ParserVal((Object) ">");
+//                            return Parser.RELOP;
+//                        }
+//                    }
+//                    else if(c == ':') {
+//                        nextChar = getNextChar();
+//                        if(nextChar == '=') {
+//                            yyparser.yylval = new ParserVal((Object) ":=");
+//                            return Parser.ASSIGN;
+//                        }
+//                        else if(nextChar == ':') {
+//                            yyparser.yylval = new ParserVal((Object) "::");
+//                            return Parser.TYPEOF;
+//                        }
+//                        else {
+//                            yyparser.yylval = new ParserVal(-1);
+//                            return fail();
+//                        }
+//                    }
+//                    else if(c == '=') {
+//                        yyparser.yylval = new ParserVal((Object) "=");
+//                        return Parser.RELOP;
+//                    }
+                    if(Character.isLetter(c)) {
                         return identifyKeywords(c);
-                    } else if(Character.isDigit(c)) {
+                    }
+                    else if(Character.isDigit(c)) {
                         return identifyNumber(c);
-                    } else if(c == EOF) {
-                        state = 9999;
-                        continue;
+                    }
+                    else if(symbols.contains(c)) {
+                        return identifySymbols(c);
+                    }
+                    else if(c == EOF) {
+                        return EOF;
                     }
                     return fail();
-                case 1:     // ;
-                    yyparser.yylval = new ParserVal((Object)";");
-                    return Parser.SEMI;
-                case 2:     // +, -, *, /
-                    yyparser.yylval = new ParserVal((Object) lexeme);
-                    return Parser.OP;
-                case 3:     // (
-                    yyparser.yylval = new ParserVal((Object) "(");
-                    return Parser.LPAREN;
-                case 4:     // )
-                    yyparser.yylval = new ParserVal((Object) ")");
-                    return Parser.RPAREN;
-                case 5:     // ,
-                    yyparser.yylval = new ParserVal((Object) ",");
-                    return Parser.COMMA;
-                case 6:     // <
-                    nextChar = getNextChar();
-                    if(nextChar == '=') {
-                        state = 9;
-                        continue;
-                    } else if(nextChar == '>') {
-                        state = 11;
-                        continue;
-                    } else {
-                        this.bufferPosition--;      // retract
-                        yyparser.yylval = new ParserVal((Object) "<");
-                        return Parser.RELOP;
-                    }
-                case 7:     // >
-                    nextChar = getNextChar();
-                    if(nextChar == '=') {
-                        state = 10;
-                        continue;
-                    } else {
-                        this.bufferPosition--;      // retract
-                        yyparser.yylval = new ParserVal((Object) ">");
-                        return Parser.RELOP;
-                    }
-                case 8:     // :
-                    nextChar = getNextChar();
-                    if(nextChar == '=') {
-                        state = 12;
-                        continue;
-                    } else if(nextChar == ':') {
-                        state = 13;
-                        continue;
-                    } else {
-                        state = 999;
-                        continue;
-                    }
-                case 9:     // <=
-                    yyparser.yylval = new ParserVal((Object) "<=");
-                    return Parser.RELOP;
-                case 10:    // >=
-                    yyparser.yylval = new ParserVal((Object) ">=");
-                    return Parser.RELOP;
-                case 11:    // <>
-                    yyparser.yylval = new ParserVal((Object) "<>");
-                    return Parser.RELOP;
-                case 12:    // :=
-                    yyparser.yylval = new ParserVal((Object) ":=");
-                    return Parser.ASSIGN;
-                case 13:    // ::
-                    yyparser.yylval = new ParserVal((Object) "::");
-                    return Parser.TYPEOF;
-                case 999:
-                    yyparser.yylval = new ParserVal(-1);
-                    return fail();
-                case 9999:
-                    return EOF;
             }
         }
+    }
+
+    private int identifySymbols(char c) {
+        List<Character> symbols = Arrays.asList( '(', ')', ':', '=', '+', '-', '*', '/', ';', ',', '<', '>' );
+        StringBuilder sb = new StringBuilder();
+        while(symbols.contains(c)) {
+            sb.append(c);
+            c = getNextChar();
+        }
+
+//        String[] keySymbols = { "(", ")", ":=", "::", "+", "-", "*", "/", ";", ",", "<", ">", "=", "<>", "<=", ">=" };
+        int token = -1;
+        String temp = sb.toString();
+        if(temp.equals("+") || temp.equals("-") || temp.equals("*") || temp.equals("/"))
+            token = Parser.OP;
+        else if(temp.equals("<") || temp.equals(">") || temp.equals("<=") || temp.equals(">=") || temp.equals("=") || temp.equals("<>"))
+            token = Parser.RELOP;
+        else if(temp.equals("("))
+            token = Parser.LPAREN;
+        else if(temp.equals(")"))
+            token = Parser.RPAREN;
+        else if(temp.equals(";"))
+            token = Parser.SEMI;
+        else if(temp.equals(","))
+            token = Parser.COMMA;
+        else if(temp.equals(":="))
+            token = Parser.ASSIGN;
+        else if(temp.equals("::"))
+            token = Parser.TYPEOF;
+
+        bufferPosition--;   // retract
+        yyparser.yylval = new ParserVal((Object) sb.toString());
+        return token;
     }
 
     private int identifyKeywords(char c) {
