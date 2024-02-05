@@ -1,0 +1,7 @@
+func main::int()
+begin
+    var a::int;
+    a := bcd + 2 * 3;
+    b := 1.234
+    print a;
+end

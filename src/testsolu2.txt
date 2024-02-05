@@ -1,0 +1,12 @@
+<FUNC, token-attr:"func", 1:1>
+<ID, token-attr:"main", 1:6>
+<TYPEOF, token-attr:"::", 1:10>
+<VOID, token-attr:"void", 1:12>
+<LPAREN, token-attr:"(", 1:16>
+<RPAREN, token-attr:")", 1:17>
+<BEGIN, token-attr:"begin", 2:1>
+<PRINT, token-attr:"print", 3:5>
+<ID, token-attr:"a", 3:11>
+<SEMI, token-attr:";", 3:12>
+<END, token-attr:"end", 4:1>
+Success!

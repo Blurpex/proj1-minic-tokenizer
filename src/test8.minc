@@ -1,0 +1,15 @@
+
++ - * /
+< > = <> <= >=
+:= :: ( ) begin end ; ,
+int print func if then else while void var
+
+func main()
+begin func 
+    a = 1.234;
+    if a<=2<b==c>NaN_ begin
+       
+    begin
+    NaN = 1.23.4;   // number cannot starts from "."
+end
+
