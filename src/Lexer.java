@@ -11,6 +11,7 @@ public class Lexer {
     private final char[] bufferTwo = new char[10];
     private int bufferPosition = 10;
     private boolean mutex = false;      // true for bufferOne, false for bufferTwo
+    public int tempCol;
 
     public Lexer(java.io.Reader reader, Parser yyparser) throws Exception {
         this.reader = reader;
@@ -62,17 +63,8 @@ public class Lexer {
             buffer = readBuffer();
         char nextChar = buffer[bufferPosition];
         this.bufferPosition++;
-        updateLineAndColumn(String.valueOf(nextChar));
+        if(nextChar != '\n') tempCol++;
         return nextChar;
-    }
-
-    public void updateLineAndColumn(String token) {
-        if(token.equals("\n")) {
-            lineno++;
-            column = 1;
-        } else {
-            column += token.length();
-        }
     }
 
     /*
@@ -92,9 +84,19 @@ public class Lexer {
         while(true) {
             switch(state) {
                 case 0:
+                    if(tempCol > 0) column = tempCol;
                     c = getNextChar();
                     // ignore newlines and whitespace
-                    if(Character.isWhitespace(c)) continue;
+                    if(Character.isWhitespace(c)) {
+                        if(c == '\n') {
+                            lineno++;
+                            column = 1;
+                            tempCol = 0;
+                        }
+                        continue;
+                    } else {
+                        column = tempCol;
+                    }
 
                     if(c == ';') {
                         state = 1;
@@ -157,6 +159,7 @@ public class Lexer {
                         state = 11;
                         continue;
                     } else {
+                        tempCol--;
                         this.bufferPosition--;      // retract
                         yyparser.yylval = new ParserVal((Object) "<");
                         return Parser.RELOP;
@@ -167,6 +170,7 @@ public class Lexer {
                         state = 10;
                         continue;
                     } else {
+                        tempCol--;
                         this.bufferPosition--;      // retract
                         yyparser.yylval = new ParserVal((Object) ">");
                         return Parser.RELOP;
@@ -198,6 +202,8 @@ public class Lexer {
                 case 13:    // ::
                     yyparser.yylval = new ParserVal((Object) "::");
                     return Parser.TYPEOF;
+                case 14:
+
                 case 999:
                     yyparser.yylval = new ParserVal(-1);
                     return fail();
@@ -214,6 +220,7 @@ public class Lexer {
             c = getNextChar();
         }
 
+        tempCol--;
         bufferPosition--;   // retract
         yyparser.yylval = new ParserVal((Object) sb.toString());
         int token = Parser.ID;
@@ -254,6 +261,7 @@ public class Lexer {
             c = getNextChar();
         }
 
+        tempCol--;
         bufferPosition--;   // retract
         if(!digitAfterDot) return -1;
         yyparser.yylval = new ParserVal((Object) sb.toString());
