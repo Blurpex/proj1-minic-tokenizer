@@ -28,6 +28,7 @@ public class Lexer {
     }
 
     public int fail() {
+        yyparser.yylval = new ParserVal(-1);
         return -1;
     }
 
@@ -94,9 +95,7 @@ public class Lexer {
                             tempCol = 0;
                         }
                         continue;
-                    } else {
-                        column = tempCol;
-                    }
+                    } else column = tempCol;
 
                     if(c == ';') {
                         state = 1;
@@ -202,12 +201,11 @@ public class Lexer {
                 case 13:    // ::
                     yyparser.yylval = new ParserVal((Object) "::");
                     return Parser.TYPEOF;
-                case 14:
-
                 case 999:
                     yyparser.yylval = new ParserVal(-1);
                     return fail();
                 case 9999:
+                    yyparser.yylval = new ParserVal(-1);
                     return EOF;
             }
         }
